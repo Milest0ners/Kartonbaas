@@ -36,6 +36,14 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+function extractDeliveryMoment(addons: string[]): string {
+  return addons.find((item) => item.startsWith('Aflevermoment:'))?.replace('Aflevermoment: ', '') ?? '-';
+}
+
+function visibleAddons(addons: string[]): string[] {
+  return addons.filter((item) => !item.startsWith('Aflevermoment:'));
+}
+
 function isAuthorized(token: string | undefined): boolean {
   const dashboardToken = process.env.ADMIN_DASHBOARD_TOKEN;
   if (!dashboardToken) return true;
@@ -201,7 +209,7 @@ export default async function AdminOrdersPage({
                   <div>
                     <dt className="text-gray-500">Add-ons</dt>
                     <dd className="font-semibold text-ink">
-                      {order.addons.length ? order.addons.join(', ') : 'Geen'}
+                      {visibleAddons(order.addons).length ? visibleAddons(order.addons).join(', ') : 'Geen'}
                     </dd>
                   </div>
                   <div>
@@ -209,10 +217,14 @@ export default async function AdminOrdersPage({
                     <dd className="font-semibold text-ink">{formatDate(order.created_at)}</dd>
                   </div>
                   <div className="md:col-span-3">
-                    <dt className="text-gray-500">Adres</dt>
+                    <dt className="text-gray-500">Afleveradres</dt>
                     <dd className="font-semibold text-ink">
                       {order.customer_address}, {order.customer_postcode} {order.customer_city}
                     </dd>
+                  </div>
+                  <div className="md:col-span-3">
+                    <dt className="text-gray-500">Gekozen levermoment</dt>
+                    <dd className="font-semibold text-ink">{extractDeliveryMoment(order.addons)}</dd>
                   </div>
                   {order.customer_note && (
                     <div className="md:col-span-3">

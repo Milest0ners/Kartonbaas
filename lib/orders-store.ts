@@ -57,6 +57,49 @@ function getFormatSummary(format: string, exactHeightCm?: string): string {
   return exactHeightCm ? `${label} (${exactHeightCm} cm)` : label;
 }
 
+function shiftBusinessDays(startDate: Date, businessDays: number): Date {
+  const result = new Date(startDate);
+  if (businessDays === 0) return result;
+  const direction = businessDays > 0 ? 1 : -1;
+  let moved = 0;
+  while (moved < Math.abs(businessDays)) {
+    result.setDate(result.getDate() + direction);
+    const day = result.getDay();
+    if (day !== 0 && day !== 6) moved += 1;
+  }
+  return result;
+}
+
+function formatDeliveryDate(date: Date): string {
+  return new Intl.DateTimeFormat('nl-NL', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(date);
+}
+
+function getDeliveryTimingAddonLabel(timing: string | undefined, paidAt: string | null): string {
+  const referenceDate = paidAt ? new Date(paidAt) : new Date();
+  const safeDate = Number.isNaN(referenceDate.getTime()) ? new Date() : referenceDate;
+  const baseDate = shiftBusinessDays(safeDate, 4);
+
+  switch (timing) {
+    case 'eerder_1':
+      return `Aflevermoment: 1 werkdag eerder (${formatDeliveryDate(shiftBusinessDays(baseDate, -1))})`;
+    case 'eerder_2':
+      return `Aflevermoment: 2 werkdagen eerder (${formatDeliveryDate(shiftBusinessDays(baseDate, -2))})`;
+    case 'later_1':
+      return `Aflevermoment: 1 werkdag later (${formatDeliveryDate(shiftBusinessDays(baseDate, 1))})`;
+    case 'later_2':
+      return `Aflevermoment: 2 werkdagen later (${formatDeliveryDate(shiftBusinessDays(baseDate, 2))})`;
+    case 'later_3':
+      return `Aflevermoment: 3 werkdagen later (${formatDeliveryDate(shiftBusinessDays(baseDate, 3))})`;
+    case 'standaard':
+    default:
+      return `Aflevermoment: Standaard (${formatDeliveryDate(baseDate)})`;
+  }
+}
+
 function getSupabaseClient() {
   if (supabaseClient) return supabaseClient;
 
@@ -110,6 +153,12 @@ export async function upsertPaidOrder(input: UpsertOrderInput): Promise<StoredOr
   const client = getSupabaseClient();
   if (!client) return null;
 
+  const deliveryAddon = getDeliveryTimingAddonLabel(input.metadata.deliveryTiming, input.paidAt);
+  const normalizedAddons = [...input.metadata.addons];
+  if (!normalizedAddons.some((item) => item.startsWith('Aflevermoment:'))) {
+    normalizedAddons.push(deliveryAddon);
+  }
+
   const { data, error } = await client
     .from('orders')
     .upsert(
@@ -126,7 +175,7 @@ export async function upsertPaidOrder(input: UpsertOrderInput): Promise<StoredOr
         customer_note: input.metadata.opmerking || '',
         format: getFormatSummary(input.metadata.format, input.metadata.exactHeightCm),
         quantity: input.metadata.quantity,
-        addons: input.metadata.addons,
+        addons: normalizedAddons,
         total: input.metadata.total,
         file_url: input.metadata.fileUrl,
         file_id: input.metadata.fileId,

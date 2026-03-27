@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
+  getOrderById,
   updateOrderFulfillmentStatus,
   type FulfillmentStatus,
 } from '@/lib/orders-store';
+import { sendOrderStatusEmail } from '@/lib/email';
 
 export const runtime = 'nodejs';
 
@@ -39,7 +41,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Ongeldige status' }, { status: 400 });
     }
 
+    const existingOrder = await getOrderById(orderId);
     await updateOrderFulfillmentStatus(orderId, fulfillmentStatus);
+
+    if (existingOrder && existingOrder.fulfillment_status !== fulfillmentStatus) {
+      if (fulfillmentStatus === 'in_productie' || fulfillmentStatus === 'verzonden') {
+        try {
+          await sendOrderStatusEmail({ ...existingOrder, fulfillment_status: fulfillmentStatus }, fulfillmentStatus);
+        } catch (emailError) {
+          console.error('[admin-orders-status] statusmail mislukt:', emailError);
+        }
+      }
+    }
 
     const redirectUrl = token ? `/admin/orders?t=${encodeURIComponent(token)}` : '/admin/orders';
     return NextResponse.redirect(new URL(redirectUrl, request.url), { status: 303 });

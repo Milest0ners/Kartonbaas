@@ -1,6 +1,7 @@
 import type { MolliePaymentMetadata } from './mollie';
 import { PRICING, formatCurrency } from './pricing';
 import type { Format } from './pricing';
+import type { StoredOrder } from './orders-store';
 
 export interface EmailOrder {
   ordernummer: string;
@@ -79,6 +80,55 @@ async function sendEmail(to: string, subject: string, html: string) {
   } else {
     await sendViaSmtp(to, subject, html);
   }
+}
+
+export async function sendOrderStatusEmail(order: StoredOrder, status: 'in_productie' | 'verzonden'): Promise<void> {
+  const to = order.customer_email;
+  if (!to) return;
+
+  const isProduction = status === 'in_productie';
+  const subject = isProduction
+    ? 'Je bestelling is goedgekeurd en gaat nu in productie'
+    : 'Je bestelling is verzonden';
+
+  const statusText = isProduction
+    ? 'Je foto is gecontroleerd en goedgekeurd. We gaan nu starten met de productie van je cut-out.'
+    : 'Goed nieuws: je bestelling is verzonden. Je kunt de levering binnenkort verwachten.';
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="nl">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f9fafb; margin: 0; padding: 0; }
+        .wrapper { max-width: 560px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .header { background: #111827; padding: 28px 32px; }
+        .header h1 { color: #ffffff; margin: 0; font-size: 20px; font-weight: 700; }
+        .body { padding: 32px; }
+        .body p { color: #374151; line-height: 1.7; margin: 0 0 14px; }
+        .tag { display: inline-block; background: #fff7ed; border: 1px solid #fdba74; color: #9a3412; font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 999px; margin-bottom: 14px; }
+      </style>
+    </head>
+    <body>
+      <div class="wrapper">
+        <div class="header">
+          <h1>Kartonbaas</h1>
+        </div>
+        <div class="body">
+          <span class="tag">${isProduction ? 'In productie' : 'Verzonden'}</span>
+          <p>Hallo ${order.customer_name},</p>
+          <p>${statusText}</p>
+          <p><strong>Ordernummer:</strong> ${order.order_number}</p>
+          <p>Vragen? Mail ons via <a href="mailto:info@kartonbaas.nl" style="color:#111827;">info@kartonbaas.nl</a>.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  await sendEmail(to, subject, html);
 }
 
 export async function sendCustomerEmail(order: EmailOrder): Promise<void> {
