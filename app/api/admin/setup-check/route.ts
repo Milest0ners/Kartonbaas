@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(`${supabaseUrl}/rest/v1/orders?select=id&limit=1`, {
+    const response = await fetch(`${supabaseUrl}/rest/v1/orders?select=id,order_number,created_at&order=created_at.desc&limit=5`, {
       method: 'GET',
       headers: {
         apikey: serviceRoleKey,
@@ -57,11 +57,22 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    const rows = (await response.json()) as Array<{ id: string; order_number?: string; created_at?: string }>;
+
     return NextResponse.json({
       ok: true,
       configured: true,
       tableReady: true,
       message: 'Supabase orderopslag is klaar.',
+      projectRef: (() => {
+        try {
+          return new URL(supabaseUrl).hostname.split('.')[0] ?? null;
+        } catch {
+          return null;
+        }
+      })(),
+      ordersCountPreview: rows.length,
+      latestOrderNumber: rows[0]?.order_number ?? null,
     });
   } catch (error) {
     return NextResponse.json({
