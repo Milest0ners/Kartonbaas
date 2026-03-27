@@ -163,17 +163,35 @@ export async function setOrderEmailFlags(
 }
 
 export async function listOrders(limit = 100): Promise<StoredOrder[]> {
-  const client = getSupabaseClient();
-  if (!client) return [];
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceRoleKey) return [];
 
-  const { data, error } = await client
-    .from('orders')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(limit);
+  const response = await fetch(
+    `${supabaseUrl}/rest/v1/orders?select=*&order=created_at.desc&limit=${Math.max(1, limit)}`,
+    {
+      method: 'GET',
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+      },
+      cache: 'no-store',
+    }
+  );
 
-  if (error) throw error;
-  return (data ?? []) as StoredOrder[];
+  if (!response.ok) {
+    let details = `HTTP ${response.status}`;
+    try {
+      const json = (await response.json()) as { message?: string; code?: string };
+      details = json.code ? `${json.code}: ${json.message ?? details}` : (json.message ?? details);
+    } catch {
+      // keep default details
+    }
+    throw new Error(details);
+  }
+
+  const data = (await response.json()) as StoredOrder[];
+  return data ?? [];
 }
 
 export async function updateOrderFulfillmentStatus(
