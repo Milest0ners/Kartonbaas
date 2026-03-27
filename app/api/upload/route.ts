@@ -17,6 +17,18 @@ function hasCloudinaryConfig(): boolean {
   return true;
 }
 
+function cloudinaryMissingKeys(): string[] {
+  const missing: string[] = [];
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+  if (!cloudName || cloudName.startsWith('jouw_')) missing.push('CLOUDINARY_CLOUD_NAME');
+  if (!apiKey || apiKey.startsWith('jouw_')) missing.push('CLOUDINARY_API_KEY');
+  if (!apiSecret || apiSecret.startsWith('jouw_')) missing.push('CLOUDINARY_API_SECRET');
+  return missing;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -57,6 +69,16 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    if (!hasCloudinaryConfig()) {
+      const missing = cloudinaryMissingKeys();
+      return NextResponse.json(
+        {
+          error: `Cloudinary is niet goed geconfigureerd. Ontbrekende variabelen: ${missing.join(', ') || 'onbekend'}.`,
+        },
+        { status: 500 }
+      );
+    }
+
     const result = await uploadToCloudinary(buffer);
 
     return NextResponse.json({
@@ -65,8 +87,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('[upload] error:', error);
+    const message = error instanceof Error ? error.message : 'Onbekende uploadfout.';
     return NextResponse.json(
-      { error: 'Upload mislukt. Probeer het opnieuw.' },
+      { error: `Upload mislukt. ${message}` },
       { status: 500 }
     );
   }
