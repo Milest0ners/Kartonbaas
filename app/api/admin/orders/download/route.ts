@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { getOrderById } from '@/lib/orders-store';
+import { ADMIN_AUTH_COOKIE, verifyAdminSessionToken } from '@/lib/admin-auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -12,7 +13,12 @@ function noStoreJson(body: unknown, init?: ResponseInit) {
   return response;
 }
 
-function isAuthorized(token: string | null): boolean {
+async function isAuthorized(request: NextRequest, token: string | null): Promise<boolean> {
+  const expectedPassword = process.env.ADMIN_DASHBOARD_PASSWORD ?? process.env.ADMIN_DASHBOARD_TOKEN ?? '';
+  const cookieToken = request.cookies.get(ADMIN_AUTH_COOKIE)?.value;
+  if (await verifyAdminSessionToken(cookieToken, expectedPassword)) {
+    return true;
+  }
   const dashboardToken = process.env.ADMIN_DASHBOARD_TOKEN;
   if (!dashboardToken) return true;
   return Boolean(token && token === dashboardToken);
@@ -47,7 +53,7 @@ function dataUrlToResponse(dataUrl: string, baseFileName: string): NextResponse 
 export async function GET(request: NextRequest) {
   try {
     const token = request.nextUrl.searchParams.get('t');
-    if (!isAuthorized(token)) {
+    if (!(await isAuthorized(request, token))) {
       return noStoreJson({ error: 'Unauthorized' }, { status: 401 });
     }
 

@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-const ADMIN_AUTH_COOKIE = 'kartonbaas_admin_auth';
+import { ADMIN_AUTH_COOKIE, verifyAdminSessionToken } from '@/lib/admin-auth';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const expectedPassword = process.env.ADMIN_DASHBOARD_PASSWORD ?? process.env.ADMIN_DASHBOARD_TOKEN ?? '';
   const authCookie = request.cookies.get(ADMIN_AUTH_COOKIE)?.value;
-  const isAuthenticated = Boolean(expectedPassword) && authCookie === expectedPassword;
+  const isAuthenticated = await verifyAdminSessionToken(authCookie, expectedPassword);
 
   const isAdminLogin = pathname === '/admin/login';
   const isAdminRoute = pathname.startsWith('/admin');

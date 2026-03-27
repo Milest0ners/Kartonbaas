@@ -4,11 +4,23 @@ import { createPayment } from '@/lib/mollie';
 import { calculatePrice } from '@/lib/pricing';
 import { validatePostalCombination } from '@/lib/postal-validation';
 import type { Format, Addon } from '@/lib/pricing';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
+    const rateLimit = checkRateLimit(request.headers, 'create-payment', 20, 10 * 60 * 1000);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Te veel betalingsverzoeken. Probeer het over een paar minuten opnieuw.' },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) },
+        }
+      );
+    }
+
     const body = await request.json();
     const validation = validateCreatePaymentBody(body);
 

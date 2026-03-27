@@ -5,6 +5,7 @@ import {
   type FulfillmentStatus,
 } from '@/lib/orders-store';
 import { sendOrderStatusEmail } from '@/lib/email';
+import { ADMIN_AUTH_COOKIE, verifyAdminSessionToken } from '@/lib/admin-auth';
 
 export const runtime = 'nodejs';
 
@@ -16,7 +17,12 @@ const ALLOWED_STATUSES: FulfillmentStatus[] = [
   'afgerond',
 ];
 
-function isAuthorized(token: string | null): boolean {
+async function isAuthorized(request: NextRequest, token: string | null): Promise<boolean> {
+  const expectedPassword = process.env.ADMIN_DASHBOARD_PASSWORD ?? process.env.ADMIN_DASHBOARD_TOKEN ?? '';
+  const cookieToken = request.cookies.get(ADMIN_AUTH_COOKIE)?.value;
+  if (await verifyAdminSessionToken(cookieToken, expectedPassword)) {
+    return true;
+  }
   const dashboardToken = process.env.ADMIN_DASHBOARD_TOKEN;
   if (!dashboardToken) return true;
   return Boolean(token && token === dashboardToken);
@@ -29,7 +35,7 @@ export async function POST(request: NextRequest) {
     const fulfillmentStatus = String(formData.get('fulfillmentStatus') ?? '') as FulfillmentStatus;
     const token = String(formData.get('t') ?? '');
 
-    if (!isAuthorized(token)) {
+    if (!(await isAuthorized(request, token))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

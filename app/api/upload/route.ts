@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { uploadToCloudinary } from '@/lib/upload';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -31,6 +32,17 @@ function cloudinaryMissingKeys(): string[] {
 
 export async function POST(request: NextRequest) {
   try {
+    const rateLimit = checkRateLimit(request.headers, 'upload', 20, 10 * 60 * 1000);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Te veel uploadverzoeken. Probeer het later opnieuw.' },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) },
+        }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get('file');
 

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import {
@@ -7,6 +8,7 @@ import {
   type FulfillmentStatus,
   type StoredOrder,
 } from '@/lib/orders-store';
+import { ADMIN_AUTH_COOKIE, verifyAdminSessionToken } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +46,12 @@ function visibleAddons(addons: string[]): string[] {
   return addons.filter((item) => !item.startsWith('Aflevermoment:'));
 }
 
-function isAuthorized(token: string | undefined): boolean {
+async function isAuthorized(token: string | undefined): Promise<boolean> {
+  const expectedPassword = process.env.ADMIN_DASHBOARD_PASSWORD ?? process.env.ADMIN_DASHBOARD_TOKEN ?? '';
+  const cookieToken = cookies().get(ADMIN_AUTH_COOKIE)?.value;
+  if (await verifyAdminSessionToken(cookieToken, expectedPassword)) {
+    return true;
+  }
   const dashboardToken = process.env.ADMIN_DASHBOARD_TOKEN;
   if (!dashboardToken) return true;
   return Boolean(token && token === dashboardToken);
@@ -83,7 +90,7 @@ export default async function AdminOrdersPage({
 }) {
   const token = searchParams?.t;
 
-  if (!isAuthorized(token)) {
+  if (!(await isAuthorized(token))) {
     return (
       <>
         <Header />

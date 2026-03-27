@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sendContactFormEmail } from '@/lib/email';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 type ContactPayload = {
   name?: unknown;
@@ -16,6 +17,17 @@ function asTrimmedString(value: unknown): string {
 
 export async function POST(req: Request) {
   try {
+    const rateLimit = checkRateLimit(req.headers, 'contact', 10, 10 * 60 * 1000);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Te veel berichten verstuurd. Probeer het later opnieuw.' },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) },
+        }
+      );
+    }
+
     const body = (await req.json()) as ContactPayload;
     const name = asTrimmedString(body.name);
     const email = asTrimmedString(body.email);

@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { ADMIN_AUTH_COOKIE, getAdminPassword } from '@/lib/admin-auth';
+import { ADMIN_AUTH_COOKIE, createAdminSessionToken, getAdminPassword } from '@/lib/admin-auth';
 
 export async function loginAdmin(formData: FormData) {
   const providedPassword = String(formData.get('password') ?? '');
@@ -16,7 +16,8 @@ export async function loginAdmin(formData: FormData) {
     redirect('/admin/login?error=invalid');
   }
 
-  cookies().set(ADMIN_AUTH_COOKIE, expectedPassword, {
+  const sessionToken = await createAdminSessionToken(expectedPassword);
+  cookies().set(ADMIN_AUTH_COOKIE, sessionToken, {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',

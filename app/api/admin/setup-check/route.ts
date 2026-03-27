@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ADMIN_AUTH_COOKIE, verifyAdminSessionToken } from '@/lib/admin-auth';
 
 export const runtime = 'nodejs';
 
-function isAuthorized(token: string | null): boolean {
+async function isAuthorized(request: NextRequest, token: string | null): Promise<boolean> {
+  const expectedPassword = process.env.ADMIN_DASHBOARD_PASSWORD ?? process.env.ADMIN_DASHBOARD_TOKEN ?? '';
+  const cookieToken = request.cookies.get(ADMIN_AUTH_COOKIE)?.value;
+  if (await verifyAdminSessionToken(cookieToken, expectedPassword)) {
+    return true;
+  }
   const dashboardToken = process.env.ADMIN_DASHBOARD_TOKEN;
   if (!dashboardToken) return true;
   return Boolean(token && token === dashboardToken);
@@ -10,7 +16,7 @@ function isAuthorized(token: string | null): boolean {
 
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get('t');
-  if (!isAuthorized(token)) {
+  if (!(await isAuthorized(request, token))) {
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
   }
 
