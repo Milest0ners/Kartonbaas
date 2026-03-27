@@ -4,7 +4,7 @@ export interface UploadResult {
 }
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic'];
-const MAX_SIZE_MB = 25;
+const MAX_SIZE_MB = 4;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
 export function validateUploadFile(file: File): string | null {

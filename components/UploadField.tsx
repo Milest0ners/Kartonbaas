@@ -136,10 +136,16 @@ export default function UploadField({ onUploadSuccess, onUploadError, onClear, c
         body: formData,
       });
 
-      const json = await res.json();
+      const raw = await res.text();
+      let json: { error?: string; fileUrl?: string; fileId?: string } = {};
+      try {
+        json = raw ? (JSON.parse(raw) as typeof json) : {};
+      } catch {
+        // Non-JSON response (e.g. platform body-size rejection)
+      }
 
-      if (!res.ok || json.error) {
-        const msg = json.error ?? 'Upload mislukt. Probeer het opnieuw.';
+      if (!res.ok || json.error || !json.fileUrl || !json.fileId) {
+        const msg = json.error ?? `Upload mislukt (HTTP ${res.status}). Controleer bestandsgrootte en probeer opnieuw.`;
         setUploadError(msg);
         onUploadError(msg);
         setFileName(null);
@@ -237,7 +243,7 @@ export default function UploadField({ onUploadSuccess, onUploadError, onClear, c
                     Sleep je foto hierheen
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    of klik om te bladeren. JPG, PNG, HEIC tot 25 MB
+                    of klik om te bladeren. JPG, PNG, HEIC tot 4 MB
                   </p>
                 </div>
               </>
