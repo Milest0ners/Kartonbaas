@@ -6,7 +6,7 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic'];
-const MIN_SIZE_BYTES = 2 * 1024 * 1024;
+const MIN_SIZE_BYTES = 1 * 1024 * 1024;
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 
 function hasCloudinaryConfig(): boolean {
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
     if (fileObj.size < MIN_SIZE_BYTES) {
       return NextResponse.json(
-        { error: 'Bestand is te klein. Minimaal 2 MB vereist voor voldoende afdrukkwaliteit.' },
+        { error: 'Bestand is te klein. Minimaal 1 MB vereist voor voldoende afdrukkwaliteit.' },
         { status: 400 }
       );
     }

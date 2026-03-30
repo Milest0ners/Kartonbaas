@@ -4,7 +4,7 @@ export interface UploadResult {
 }
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic'];
-const MIN_SIZE_MB = 2;
+const MIN_SIZE_MB = 1;
 const MAX_SIZE_MB = 10;
 const MIN_SIZE_BYTES = MIN_SIZE_MB * 1024 * 1024;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
