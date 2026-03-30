@@ -586,9 +586,9 @@ export default function Configurator({ onPreviewImageChange }: ConfiguratorProps
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
-              {shippingCountry === 'BE' ? (
-                <p className="mt-1 text-xs text-gray-600">Levering in Belgie: + €4,95</p>
-              ) : null}
+              <p className="mt-1 text-xs text-gray-600">
+                Verzendkosten: {shippingCountry === 'BE' ? '€24,95 (Belgie)' : '€19,95 (Nederland)'}
+              </p>
             </div>
 
             <div>

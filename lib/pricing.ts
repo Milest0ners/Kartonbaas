@@ -14,17 +14,17 @@ export const PRICING: PricingConfig = {
     mini: {
       label: 'Kids',
       height: '80 - 140 cm',
-      price: 89.95,
+      price: 69.95,
     },
     standaard: {
       label: 'Standaard',
       height: '140 - 180 cm',
-      price: 119.95,
+      price: 99.95,
     },
     xl: {
       label: 'XXL',
       height: '180 - 210 cm',
-      price: 149.95,
+      price: 119.95,
     },
   },
   addons: {},
@@ -86,10 +86,8 @@ export function calculatePrice(order: OrderPricing): {
     breakdown.push(`${deliveryLabels[deliveryTiming]}: ${formatCurrency(deliveryTotal)}`);
   }
 
-  const countrySurcharge = order.shippingCountry === 'BE' ? 4.95 : 0;
-  if (countrySurcharge > 0) {
-    breakdown.push(`Levering in Belgie: ${formatCurrency(countrySurcharge)}`);
-  }
+  const countrySurcharge = order.shippingCountry === 'BE' ? 24.95 : 19.95;
+  breakdown.push(`Verzendkosten (${order.shippingCountry === 'BE' ? 'Belgie' : 'Nederland'}): ${formatCurrency(countrySurcharge)}`);
 
   const total = basePrice + addonTotal + deliveryTotal + countrySurcharge;
 
