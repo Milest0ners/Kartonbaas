@@ -151,6 +151,9 @@ export default function Configurator({ onPreviewImageChange }: ConfiguratorProps
     }
     return null;
   })();
+  const hasExactHeightValue = Boolean(form.format && form.exactHeightCm.trim().length > 0);
+  const hasExactHeightReady = Boolean(hasExactHeightValue && !liveHeightRangeError);
+  const hasUploadedPhoto = Boolean(form.fileUrl && form.fileId);
 
   const focusFirstErrorField = (field: string) => {
     const idMap: Record<string, string> = {
@@ -416,6 +419,8 @@ export default function Configurator({ onPreviewImageChange }: ConfiguratorProps
 
         {form.format ? (
           <>
+        {hasExactHeightReady ? (
+          <>
         <section>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Aantal</h3>
           <div className="flex items-center gap-4">
@@ -473,6 +478,8 @@ export default function Configurator({ onPreviewImageChange }: ConfiguratorProps
             <p className="mt-2 text-sm text-red-600" role="alert">{fieldError('foto')}</p>
           )}
         </section>
+        {hasUploadedPhoto ? (
+          <>
         <section>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Jouw gegevens</h3>
           <div className="space-y-4">
@@ -790,6 +797,20 @@ export default function Configurator({ onPreviewImageChange }: ConfiguratorProps
         <p className="text-xs text-center text-gray-400">
           Betaling via iDEAL. Je wordt doorgestuurd naar de Mollie betaalpagina.
         </p>
+          </>
+        ) : (
+          <div className="rounded-2xl border-2 border-dashed border-orange-300 bg-orange-50 p-5 text-sm text-orange-900">
+            Upload eerst een bruikbare foto om verder te gaan naar je gegevens.
+          </div>
+        )}
+          </>
+        ) : (
+          <div className="rounded-2xl border-2 border-dashed border-orange-300 bg-orange-50 p-5 text-sm text-orange-900">
+            {hasExactHeightValue
+              ? 'Controleer het exacte formaat en vul een waarde binnen het gekozen bereik in.'
+              : 'Vul eerst je exacte formaat in om verder te gaan.'}
+          </div>
+        )}
           </>
         ) : (
           <div className="rounded-2xl border-2 border-dashed border-orange-300 bg-orange-50 p-5 text-sm text-orange-900">
