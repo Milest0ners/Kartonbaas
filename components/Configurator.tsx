@@ -63,6 +63,7 @@ export default function Configurator({ onPreviewImageChange }: ConfiguratorProps
   const [termsAccepted, setTermsAccepted] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const shippingCountry: CountryCode = form.anderAfleveradres ? form.afleverLand : form.land;
+  const hasUploadedPhoto = Boolean(form.fileUrl && form.fileId);
   const deliveryOptions: Array<{ value: DeliveryTiming; label: string }> = (() => {
     const shiftBusinessDays = (startDate: Date, businessDays: number) => {
       const result = new Date(startDate);
@@ -473,7 +474,8 @@ export default function Configurator({ onPreviewImageChange }: ConfiguratorProps
             <p className="mt-2 text-sm text-red-600" role="alert">{fieldError('foto')}</p>
           )}
         </section>
-
+        {hasUploadedPhoto ? (
+          <>
         <section>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Jouw gegevens</h3>
           <div className="space-y-4">
@@ -791,6 +793,12 @@ export default function Configurator({ onPreviewImageChange }: ConfiguratorProps
         <p className="text-xs text-center text-gray-400">
           Betaling via iDEAL. Je wordt doorgestuurd naar de Mollie betaalpagina.
         </p>
+          </>
+        ) : (
+          <div className="rounded-2xl border-2 border-dashed border-orange-300 bg-orange-50 p-5 text-sm text-orange-900">
+            Upload eerst een bruikbare foto om je gegevens in te vullen en af te rekenen.
+          </div>
+        )}
           </>
         ) : (
           <div className="rounded-2xl border-2 border-dashed border-orange-300 bg-orange-50 p-5 text-sm text-orange-900">
