@@ -4,13 +4,18 @@ export interface UploadResult {
 }
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic'];
-const MAX_SIZE_MB = 4;
+const MIN_SIZE_MB = 2;
+const MAX_SIZE_MB = 10;
+const MIN_SIZE_BYTES = MIN_SIZE_MB * 1024 * 1024;
 const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 
 export function validateUploadFile(file: File): string | null {
   if (!ALLOWED_TYPES.includes(file.type.toLowerCase()) &&
       !file.name.toLowerCase().endsWith('.heic')) {
     return 'Alleen JPG, PNG en HEIC bestanden zijn toegestaan.';
+  }
+  if (file.size < MIN_SIZE_BYTES) {
+    return `Bestand is te klein. Minimaal ${MIN_SIZE_MB} MB vereist voor voldoende afdrukkwaliteit.`;
   }
   if (file.size > MAX_SIZE_BYTES) {
     return `Bestand is te groot. Maximaal ${MAX_SIZE_MB} MB toegestaan.`;

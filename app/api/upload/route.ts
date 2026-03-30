@@ -6,7 +6,8 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic'];
-const MAX_SIZE_BYTES = 4 * 1024 * 1024;
+const MIN_SIZE_BYTES = 2 * 1024 * 1024;
+const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 
 function hasCloudinaryConfig(): boolean {
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
@@ -64,7 +65,13 @@ export async function POST(request: NextRequest) {
 
     if (fileObj.size > MAX_SIZE_BYTES) {
       return NextResponse.json(
-        { error: 'Bestand is te groot. Maximaal 4 MB toegestaan.' },
+        { error: 'Bestand is te groot. Maximaal 10 MB toegestaan.' },
+        { status: 400 }
+      );
+    }
+    if (fileObj.size < MIN_SIZE_BYTES) {
+      return NextResponse.json(
+        { error: 'Bestand is te klein. Minimaal 2 MB vereist voor voldoende afdrukkwaliteit.' },
         { status: 400 }
       );
     }

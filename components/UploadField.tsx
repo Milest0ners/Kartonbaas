@@ -243,7 +243,7 @@ export default function UploadField({ onUploadSuccess, onUploadError, onClear, c
                     Sleep je foto hierheen
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    of klik om te bladeren. JPG, PNG, HEIC tot 4 MB
+                    of klik om te bladeren. JPG, PNG, HEIC tussen 2 en 10 MB
                   </p>
                 </div>
               </>
