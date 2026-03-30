@@ -233,7 +233,7 @@ export default function Hero() {
               <p className="text-white font-black text-xs uppercase tracking-widest">Nieuw in NL</p>
             </div>
             <div className="absolute -top-5 left-0 bg-white border-2 border-ink rounded-2xl px-3 py-2 shadow-bold rotate-[-6deg]">
-              <p className="text-ink font-black text-xs">⏱️ Fotocheck &lt;24u</p>
+              <p className="text-ink font-black text-xs">⏱️ Drukproef &lt;24u</p>
             </div>
             <div className="absolute top-10 -right-5 bg-white border-2 border-ink rounded-2xl px-3 py-2 shadow-bold rotate-[6deg]">
               <p className="text-ink font-black text-xs">✨ Haarscherpe print</p>

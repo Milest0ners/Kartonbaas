@@ -207,10 +207,6 @@ export default function Configurator({ onPreviewImageChange }: ConfiguratorProps
     }
     if (!form.format || !pricing || !form.fileUrl || !form.fileId) return;
 
-    const selectedAdres = form.anderAfleveradres ? form.afleverAdres : form.adres;
-    const selectedPostcode = form.anderAfleveradres ? form.afleverPostcode : form.postcode;
-    const selectedStad = form.anderAfleveradres ? form.afleverStad : form.stad;
-
     setIsSubmitting(true);
 
     // Keep a lightweight local summary so the thank-you page can show context
@@ -220,9 +216,9 @@ export default function Configurator({ onPreviewImageChange }: ConfiguratorProps
         naam: form.naam,
         email: form.email,
         land: form.land,
-        adres: selectedAdres,
-        postcode: selectedPostcode,
-        stad: selectedStad,
+        adres: form.adres,
+        postcode: form.postcode,
+        stad: form.stad,
         anderAfleveradres: form.anderAfleveradres,
         afleverLand: form.afleverLand,
         afleverAdres: form.afleverAdres,
@@ -255,9 +251,9 @@ export default function Configurator({ onPreviewImageChange }: ConfiguratorProps
           naam: form.naam,
           email: form.email,
           land: form.land,
-          adres: selectedAdres,
-          postcode: selectedPostcode,
-          stad: selectedStad,
+          adres: form.adres,
+          postcode: form.postcode,
+          stad: form.stad,
           anderAfleveradres: form.anderAfleveradres,
           afleverLand: form.afleverLand,
           afleverAdres: form.afleverAdres,
