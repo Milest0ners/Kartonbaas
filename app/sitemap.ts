@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { getAllBlogPosts } from '@/lib/blog';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kartonbaas.nl';
+const siteUrl = 'https://kartonbaas.nl';
 
 const staticRoutes = [
   '/',
