@@ -40,8 +40,8 @@ export function validateOrderForm(data: OrderFormData): ValidationError[] {
   } else if (data.format) {
     const cm = Number(data.exactHeightCm.trim());
     const ranges: Record<Format, [number, number]> = {
-      mini: [80, 140],
-      standaard: [140, 180],
+      mini: [80, 139],
+      standaard: [140, 179],
       xl: [180, 210],
     };
     const [min, max] = ranges[data.format];
@@ -159,8 +159,8 @@ export function validateCreatePaymentBody(body: unknown): {
   } else {
     const cm = Number(String(b.exactHeightCm).trim());
     const ranges: Record<string, [number, number]> = {
-      mini: [80, 140],
-      standaard: [140, 180],
+      mini: [80, 139],
+      standaard: [140, 179],
       xl: [180, 210],
     };
     const range = ranges[String(b.format)];

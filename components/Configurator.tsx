@@ -16,8 +16,8 @@ interface ConfiguratorProps {
 export default function Configurator({ onPreviewImageChange }: ConfiguratorProps) {
   const getFormatRange = (format: Format): [number, number] => {
     const ranges: Record<Format, [number, number]> = {
-      mini: [80, 140],
-      standaard: [140, 180],
+      mini: [80, 139],
+      standaard: [140, 179],
       xl: [180, 210],
     };
     return ranges[format];
