@@ -44,8 +44,8 @@ function isPaymentStatusResponse(value: unknown): value is PaymentStatusResponse
 }
 
 const FORMAT_LABELS: Record<Format, string> = {
-  mini: 'Kids (80 - 140 cm)',
-  standaard: 'Standaard (140 - 180 cm)',
+  mini: 'Kids (80 - 139 cm)',
+  standaard: 'Standaard (140 - 179 cm)',
   xl: 'XXL (180 - 210 cm)',
 };
 

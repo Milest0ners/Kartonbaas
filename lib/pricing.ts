@@ -13,12 +13,12 @@ export const PRICING: PricingConfig = {
   formats: {
     mini: {
       label: 'Kids',
-      height: '80 - 140 cm',
+      height: '80 - 139 cm',
       price: 69.95,
     },
     standaard: {
       label: 'Standaard',
-      height: '140 - 180 cm',
+      height: '140 - 179 cm',
       price: 99.95,
     },
     xl: {
